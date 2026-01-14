@@ -60,14 +60,30 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: prop-reg-secrets
+  name: postgres-secret
   namespace: prop-reg
 type: Opaque
 stringData:
-  POSTGRES_USER: "dev"
   POSTGRES_PASSWORD: "pswd"
-  RABBITMQ_USER: "dev"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
   RABBITMQ_PASSWORD: "pswd"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-tokens-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
   REESTR_API_TOKEN: "SomeToken"
   YOOKASSA_SECRET_KEY: "SomeToken"
 
@@ -120,12 +136,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: prop-reg-secrets
+                  name: postgres-secret
                   key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: prop-reg-secrets
+                  name: postgres-secret
                   key: POSTGRES_PASSWORD
           volumeMounts:
             - name: pgdata
@@ -204,12 +220,12 @@ spec:
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  name: prop-reg-secrets
+                  name: rabbitmq-secret
                   key: RABBITMQ_USER
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  name: prop-reg-secrets
+                  name: rabbitmq-secret
                   key: RABBITMQ_PASSWORD
           volumeMounts:
             - name: rmqdata
@@ -372,7 +388,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           resources:
             requests:
               cpu: "100m"
@@ -418,7 +438,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           resources:
             requests:
               cpu: "200m"
@@ -464,7 +488,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           resources:
             requests:
               cpu: "200m"
@@ -510,7 +538,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           resources:
             requests:
               cpu: "150m"
@@ -556,7 +588,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           env:
             - name: REESTR_BASE_URL
               value: "https://reestr-api.ru"
@@ -606,7 +642,11 @@ spec:
             - configMapRef:
                 name: prop-reg-config
             - secretRef:
-                name: prop-reg-secrets
+                name: postgres-secret
+            - secretRef:
+                name: rabbitmq-secret
+            - secretRef:
+                name: api-tokens-secret
           resources:
             requests:
               cpu: "100m"
@@ -643,7 +683,11 @@ spec:
                 - configMapRef:
                     name: prop-reg-config
                 - secretRef:
-                    name: prop-reg-secrets
+                    name: postgres-secret
+                - secretRef:
+                    name: rabbitmq-secret
+                - secretRef:
+                    name: api-tokens-secret
               resources:
                 requests:
                   cpu: "50m"
@@ -966,5 +1010,4 @@ spec:
       ports:
         - protocol: TCP
           port: 5672
-
 ```
