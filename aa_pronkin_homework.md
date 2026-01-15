@@ -38,11 +38,23 @@ metadata:
   labels:
     name: prop-reg
 
+# =========================
+# ConfigMaps
+# =========================
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prop-reg-config
+  name: bff-api-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-config
   namespace: prop-reg
 data:
   LOG_LEVEL: "INFO"
@@ -52,9 +64,135 @@ data:
   RABBITMQ_PORT: "5672"
   RABBITMQ_CORE_TO_INT_QUEUE: "core.to.integration"
   RABBITMQ_INT_TO_CORE_QUEUE: "integration.to.core"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-master-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
   POSTGRES_HOST: "postgres"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "main"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docgen-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: integration-master-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_CORE_TO_INT_QUEUE: "core.to.integration"
+  RABBITMQ_INT_TO_CORE_QUEUE: "integration.to.core"
+  REESTR_BASE_URL: "https://reestr-api.ru"
+  PAYMENT_BASE_URL: "https://api.yookassa.ru/v3"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-migrations-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "main"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cleanup-config
+  namespace: prop-reg
+data:
+  LOG_LEVEL: "INFO"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "main"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: core-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "pswd"
+  POSTGRES_USER: "postgres"
+  RABBITMQ_PASSWORD: "pswd"
+  RABBITMQ_USER: "guest"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: data-master-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "pswd"
+  POSTGRES_USER: "postgres"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docgen-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+# Добавьте специфичные для DocGen секреты здесь
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: integration-master-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+  RABBITMQ_PASSWORD: "pswd"
+  RABBITMQ_USER: "guest"
+  REESTR_API_TOKEN: "SomeToken"
+  YOOKASSA_SECRET_KEY: "SomeToken"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-migrations-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "pswd"
+  POSTGRES_USER: "postgres"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cleanup-secret
+  namespace: prop-reg
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "pswd"
+  POSTGRES_USER: "postgres"
 
 ---
 apiVersion: v1
@@ -65,6 +203,7 @@ metadata:
 type: Opaque
 stringData:
   POSTGRES_PASSWORD: "pswd"
+  POSTGRES_USER: "postgres"
 
 ---
 apiVersion: v1
@@ -75,17 +214,7 @@ metadata:
 type: Opaque
 stringData:
   RABBITMQ_PASSWORD: "pswd"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: api-tokens-secret
-  namespace: prop-reg
-type: Opaque
-stringData:
-  REESTR_API_TOKEN: "SomeToken"
-  YOOKASSA_SECRET_KEY: "SomeToken"
+  RABBITMQ_USER: "guest"
 
 # =========================
 # PostgreSQL (StatefulSet)
@@ -129,10 +258,7 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: prop-reg-config
-                  key: POSTGRES_DB
+              value: "main"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -386,7 +512,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: bff-api-config
+            - secretRef:
+                name: bff-api-secret
           resources:
             requests:
               cpu: "100m"
@@ -430,11 +558,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: core-config
             - secretRef:
-                name: postgres-secret
-            - secretRef:
-                name: rabbitmq-secret
+                name: core-secret
           resources:
             requests:
               cpu: "200m"
@@ -478,9 +604,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: data-master-config
             - secretRef:
-                name: postgres-secret
+                name: data-master-secret
           resources:
             requests:
               cpu: "200m"
@@ -524,7 +650,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: docgen-config
+            - secretRef:
+                name: docgen-secret
           resources:
             requests:
               cpu: "150m"
@@ -568,16 +696,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: integration-master-config
             - secretRef:
-                name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
-          env:
-            - name: REESTR_BASE_URL
-              value: "https://reestr-api.ru"
-            - name: PAYMENT_BASE_URL
-              value: "https://api.yookassa.ru/v3"
+                name: integration-master-secret
           resources:
             requests:
               cpu: "200m"
@@ -620,9 +741,9 @@ spec:
           image: registry.example.com/propreg/db-migrator:1.0.0
           envFrom:
             - configMapRef:
-                name: prop-reg-config
+                name: db-migrations-config
             - secretRef:
-                name: postgres-secret
+                name: db-migrations-secret
           resources:
             requests:
               cpu: "100m"
@@ -657,9 +778,9 @@ spec:
               image: registry.example.com/propreg/maintenance:1.0.0
               envFrom:
                 - configMapRef:
-                    name: prop-reg-config
+                    name: cleanup-config
                 - secretRef:
-                    name: postgres-secret
+                    name: cleanup-secret
               resources:
                 requests:
                   cpu: "50m"
