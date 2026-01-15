@@ -387,12 +387,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: prop-reg-config
-            - secretRef:
-                name: postgres-secret
-            - secretRef:
-                name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
           resources:
             requests:
               cpu: "100m"
@@ -441,8 +435,6 @@ spec:
                 name: postgres-secret
             - secretRef:
                 name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
           resources:
             requests:
               cpu: "200m"
@@ -489,10 +481,6 @@ spec:
                 name: prop-reg-config
             - secretRef:
                 name: postgres-secret
-            - secretRef:
-                name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
           resources:
             requests:
               cpu: "200m"
@@ -537,12 +525,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: prop-reg-config
-            - secretRef:
-                name: postgres-secret
-            - secretRef:
-                name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
           resources:
             requests:
               cpu: "150m"
@@ -587,8 +569,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: prop-reg-config
-            - secretRef:
-                name: postgres-secret
             - secretRef:
                 name: rabbitmq-secret
             - secretRef:
@@ -643,10 +623,6 @@ spec:
                 name: prop-reg-config
             - secretRef:
                 name: postgres-secret
-            - secretRef:
-                name: rabbitmq-secret
-            - secretRef:
-                name: api-tokens-secret
           resources:
             requests:
               cpu: "100m"
@@ -684,10 +660,6 @@ spec:
                     name: prop-reg-config
                 - secretRef:
                     name: postgres-secret
-                - secretRef:
-                    name: rabbitmq-secret
-                - secretRef:
-                    name: api-tokens-secret
               resources:
                 requests:
                   cpu: "50m"
